@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  firstName         String
+  lastName          String
+  email             String   @unique
+  passwordHash      String
+  dateOfBirth       DateTime
+  profilePictureUrl String?  // Optional path to uploaded image
+  
+  promoYear         Int
+  jobTitle          String?
+  company           String?
+  academicBackground String?
+  
+  role              String   @default("USER") // "USER" or "ADMIN"
+  isFirstLogin      Boolean  @default(true)
+  gdprConsent       Boolean  @default(false)
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  sentRequests      ConnectionRequest[] @relation("SentRequests")
+  receivedRequests  ConnectionRequest[] @relation("ReceivedRequests")
+}
+
+model ConnectionRequest {
+  id         String   @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  status     String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  fromUser   User     @relation("SentRequests", fields: [fromUserId], references: [id])
+  toUser     User     @relation("ReceivedRequests", fields: [toUserId], references: [id])
+
+  @@unique([fromUserId, toUserId])
+}

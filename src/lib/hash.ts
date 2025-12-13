@@ -1,0 +1,27 @@
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 12;
+
+/**
+ * Hashes a password using bcrypt.
+ */
+export async function hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+/**
+ * Verifies a password against a hash.
+ */
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
+}
+
+/**
+ * Formats a Date object to DDMMYYYY string for default passwords.
+ */
+export function formatDateForDefaultPassword(date: Date): string {
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}${month}${year}`;
+}
