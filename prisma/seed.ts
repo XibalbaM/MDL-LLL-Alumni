@@ -1,14 +1,19 @@
 
 import 'dotenv/config'
-import { PrismaClient } from '@prisma/client'
-import { hashPassword, formatDateForDefaultPassword } from '../src/lib/hash'
+import { PrismaClient } from '@/generated/prisma/client'
+import { hashPassword, formatDateForDefaultPassword } from '@/lib/hash'
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient({adapter: new PrismaBetterSqlite3({url: process.env.DATABASE_URL})})
 
 async function main() {
     // Clear existing
-    await prisma.connectionRequest.deleteMany({});
-    await prisma.user.deleteMany({});
+    try {
+        await prisma.connectionRequest.deleteMany({});
+        await prisma.user.deleteMany({});
+    } catch (e) {
+        console.log(e);
+    }
 
     // Admin User
     // DOB: 01/01/2000 -> Pwd: "01012000"
@@ -69,6 +74,26 @@ async function main() {
             email: 'jules.clement@student.fr',
             passwordHash: julesHash,
             dateOfBirth: julesDob,
+            promoYear: 2026,
+            role: 'USER',
+            isFirstLogin: true,
+            gdprConsent: false,
+        }
+    });
+
+    // Lilou Blaire
+    // DOB: 13/04/2008
+    const lilouDob = new Date(2008, 3, 13); // Month is 0-indexed: April = 3
+    const lilouPwd = formatDateForDefaultPassword(lilouDob);
+    const lilouHash = await hashPassword(lilouPwd);
+
+    await prisma.user.create({
+        data: {
+            firstName: 'Lilou',
+            lastName: 'Blaire',
+            email: 'etaetsaep@student.fr',
+            passwordHash: lilouHash,
+            dateOfBirth: lilouDob,
             promoYear: 2026,
             role: 'USER',
             isFirstLogin: true,

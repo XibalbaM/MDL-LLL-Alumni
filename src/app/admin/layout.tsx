@@ -8,6 +8,7 @@ export default function AdminLayout({
     const links = [
         { name: 'Users', href: '/admin/users' },
         { name: 'Import', href: '/admin/import' },
+        { name: 'Export', href: '/admin/export' },
         { name: 'Mailing', href: '/admin/mailing' },
     ];
 
